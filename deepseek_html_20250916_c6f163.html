@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chat Assistant - Text & Image Generation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        :root {
+            --primary: #10a37f;
+            --primary-dark: #0d8c6d;
+            --secondary: #5436da;
+            --dark: #202123;
+            --light-dark: #343541;
+            --light: #ffffff;
+            --gray: #f7f7f8;
+            --border-radius: 8px;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            background-color: rgba(255, 255, 255, 0.97);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 95vh;
+        }
+        
+        .header {
+            background: linear-gradient(90deg, var(--dark), var(--light-dark));
+            color: var(--light);
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo i {
+            font-size: 28px;
+            color: var(--primary);
+        }
+        
+        .logo h1 {
+            font-size: 28px;
+            font-weight: 700;
+        }
+        
+        .nav {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--light);
+            border: none;
+            border-radius: var(--border-radius);
+            padding: 10px 15px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .main-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        .sidebar {
+            width: 260px;
+            background-color: var(--light);
+            border-right: 1px solid #eaeaea;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+        
+        .sidebar-section {
+            margin-bottom: 25px;
+        }
+        
+        .sidebar-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .chat-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 8px;
+            color: #444;
+            font-size: 14px;
+        }
+        
+        .chat-btn:hover {
+            background-color: var(--gray);
+        }
+        
+        .chat-btn i {
+            font-size: 16px;
+            color: var(--primary);
+        }
+        
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            background-color: var(--light);
+        }
+        
+        .message {
+            max-width: 80%;
+            padding: 16px 20px;
+            border-radius: 18px;
+            line-height: 1.5;
+            position: relative;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .user-message {
+            background-color: var(--primary);
+            color: var(--light);
+            align-self: flex-end;
+            border-bottom-right-radius: 5px;
+        }
+        
+        .ai-message {
+            background-color: var(--gray);
+            color: #333;
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+        }
+        
+        .message-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        .message-header i {
+            font-size: 16px;
+        }
+        
+        .input-container {
+            padding: 20px;
+            background-color: var(--light);
+            border-top: 1px solid #eaeaea;
+            display: flex;
+            gap: 12px;
+            position: relative;
+        }
+        
+        .input-actions {
+            display: flex;
+            gap: 10px;
+            position: absolute;
+            bottom: calc(100% - 10px);
+            left: 20px;
+        }
+        
+        .action-btn {
+            background: var(--light);
+            color: #666;
+            border: 1px solid #eaeaea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 16px;
+        }
+        
+        .action-btn:hover {
+            background: var(--gray);
+            color: var(--primary);
+        }
+        
+        #question-input {
+            flex: 1;
+            padding: 16px 50px 16px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+            resize: none;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        
+        #question-input:focus {
+            border-color: var(--primary);
+        }
+        
+        #send-btn {
+            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+            color: var(--light);
+            border: none;
+            border-radius: var(--border-radius);
+            width: 44px;
+            height: 44px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, opacity 0.2s;
+            position: absolute;
+            right: 30px;
+            bottom: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        #send-btn:hover {
+            opacity: 0.9;
+            transform: scale(1.02);
+        }
+        
+        #send-btn:active {
+            transform: scale(0.98);
+        }
+        
+        .typing-indicator {
+            display: none;
+            align-self: flex-start;
+            background-color: var(--gray);
+            padding: 16px 20px;
+            border-radius: 18px;
+            border-bottom-left-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .typing-indicator span {
+            height: 8px;
+            width: 8px;
+            background-color: #666;
+            display: inline-block;
+            border-radius: 50%;
+            margin-right: 5px;
+            animation: typing 1.3s infinite;
+        }
+        
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes typing {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        
+        .info-text {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            margin-top: 10px;
+            padding: 0 20px;
+        }
+        
+        .model-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 0 20px;
+        }
+        
+        .model-btn {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #eaeaea;
+            border-radius: var(--border-radius);
+            background: var(--light);
+            cursor: pointer;
+            text-align: center;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .model-btn.active {
+            border-color: var(--primary);
+            background: rgba(16, 163, 127, 0.1);
+            color: var(--primary);
+        }
+        
+        .image-response {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .image-placeholder {
+            background: linear-gradient(45deg, #f0f0f0, #e0e0e0);
+            border-radius: var(--border-radius);
+            height: 150px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #888;
+            font-size: 14px;
+            text-align: center;
+            padding: 10px;
+            overflow: hidden;
+        }
+        
+        .image-placeholder img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: cover;
+            border-radius: var(--border-radius);
+        }
+        
+        .suggestion-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .suggestion-chip {
+            background: var(--gray);
+            border: 1px solid #e0e0e0;
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .suggestion-chip:hover {
+            background: #e0e0e0;
+        }
+        
+        @media (max-width: 900px) {
+            .sidebar {
+                display: none;
+            }
+            
+            .message {
+                max-width: 90%;
+            }
+            
+            .header h1 {
+                font-size: 24px;
+            }
+            
+            .image-response {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                height: 100vh;
+                border-radius: 0;
+            }
+            
+            body {
+                padding: 0;
+            }
+            
+            .model-selector {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <i class="fas fa-robot"></i>
+                <h1>AI Chat Assistant</h1>
+            </div>
+            <div class="nav">
+                <button class="nav-btn"><i class="fas fa-sun"></i> Examples</button>
+                <button class="nav-btn"><i class="fas fa-bolt"></i> Capabilities</button>
+                <button class="nav-btn"><i class="fas fa-info-circle"></i> About</button>
+            </div>
+        </div>
+        
+        <div class="model-selector">
+            <div class="model-btn active" data-model="text">Text Model</div>
+            <div class="model-btn" data-model="image">Image Model</div>
+            <div class="model-btn" data-model="creative">Creative Mode</div>
+        </div>
+        
+        <div class="main-container">
+            <div class="sidebar">
+                <div class="sidebar-section">
+                    <div class="sidebar-title">Recent Conversations</div>
+                    <div class="chat-btn">
+                        <i class="fas fa-message"></i>
+                        <span>How to learn JavaScript</span>
+                    </div>
+                    <div class="chat-btn">
+                        <i class="fas fa-message"></i>
+                        <span>Image generation ideas</span>
+                    </div>
+                    <div class="chat-btn">
+                        <i class="fas fa-message"></i>
+                        <span>Website design tips</span>
+                    </div>
+                </div>
+                
+                <div class="sidebar-section">
+                    <div class="sidebar-title">Image Prompts</div>
+                    <div class="chat-btn">
+                        <i class="fas fa-image"></i>
+                        <span>Fantasy landscape</span>
+                    </div>
+                    <div class="chat-btn">
+                        <i class="fas fa-image"></i>
+                        <span>Abstract art ideas</span>
+                    </div>
+                    <div class="chat-btn">
+                        <i class="fas fa-image"></i>
+                        <span>Portrait photography</span>
+                    </div>
+                </div>
+                
+                <div class="sidebar-section">
+                    <div class="sidebar-title">Help & Guidance</div>
+                    <div class="chat-btn">
+                        <i class="fas fa-question-circle"></i>
+                        <span>How to use this tool</span>
+                    </div>
+                    <div class="chat-btn">
+                        <i class="fas fa-lightbulb"></i>
+                        <span>Writing tips</span>
+                    </div>
+                    <div class="chat-btn">
+                        <i class="fas fa-paint-brush"></i>
+                        <span>Image creation guide</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chat-container" id="chat-container">
+                <div class="message ai-message">
+                    <div class="message-header">
+                        <i class="fas fa-robot"></i>
+                        <span>AI Assistant</span>
+                    </div>
+                    Hi there! I'm your AI assistant. I can help you with answering questions, generating creative content, and even creating images. How can I assist you today?
+                </div>
+                
+                <div class="message user-message">
+                    <div class="message-header">
+                        <i class="fas fa-user"></i>
+                        <span>You</span>
+                    </div>
+                    Can you generate some images of nature for me?
+                </div>
+                
+                <div class="message ai-message">
+                    <div class="message-header">
+                        <i class="fas fa-robot"></i>
+                        <span>AI Assistant</span>
+                    </div>
+                    Sure! Here are some nature images I generated for you:
+                    <div class="image-response">
+                        <div class="image-placeholder">
+                            <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&q=80" alt="Mountain landscape">
+                        </div>
+                        <div class="image-placeholder">
+                            <img src="https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&q=80" alt="Beach scene">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="input-container">
+            <div class="input-actions">
+                <button class="action-btn" title="Upload image"><i class="fas fa-image"></i></button>
+                <button class="action-btn" title="Record audio"><i class="fas fa-microphone"></i></button>
+                <button class="action-btn" title="Attach file"><i class="fas fa-paperclip"></i></button>
+            </div>
+            
+            <textarea id="question-input" placeholder="Ask anything or type /image to generate images..." rows="1"></textarea>
+            <button id="send-btn"><i class="fas fa-paper-plane"></i></button>
+        </div>
+        
+        <div class="typing-indicator" id="typing-indicator">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        
+        <p class="info-text">AI Assistant may produce inaccurate information about people, places, or facts. It's designed for creative assistance.</p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatContainer = document.getElementById('chat-container');
+            const questionInput = document.getElementById('question-input');
+            const sendBtn = document.getElementById('send-btn');
+            const typingIndicator = document.getElementById('typing-indicator');
+            const modelButtons = document.querySelectorAll('.model-btn');
+            
+            // Focus input on load
+            questionInput.focus();
+            
+            // Sample text responses to simulate AI
+            const textResponses = [
+                "That's an interesting question. Based on my knowledge, there are several perspectives to consider.",
+                "I understand your question. Many experts have different opinions on this matter.",
+                "Thanks for asking! This is a common question with a complex answer.",
+                "I'm glad you asked that. The answer depends on various factors and contexts.",
+                "That's a great question! Research shows that there are multiple approaches to this.",
+                "I've considered your question carefully. Here's what I think based on available information.",
+                "Interesting query! The answer might vary depending on specific circumstances.",
+                "I appreciate your question. This topic has been studied extensively with varying results."
+            ];
+            
+            // Sample image URLs for demonstration
+            const sampleImages = [
+                "https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&q=80",
+                "https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&q=80",
+                "https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&q=80",
+                "https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&q=80"
+            ];
+            
+            // Auto-resize textarea
+            questionInput.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = (this.scrollHeight) + 'px';
+            });
+            
+            // Model selection
+            modelButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    modelButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+            
+            // Send message function
+            function sendMessage() {
+                const question = questionInput.value.trim();
+                if (question === '') return;
+                
+                // Add user message to chat
+                addMessage(question, 'user');
+                
+                // Clear input and reset height
+                questionInput.value = '';
+                questionInput.style.height = 'auto';
+                
+                // Show typing indicator
+                typingIndicator.style.display = 'flex';
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+                
+                // Check if user requested an image
+                const isImageRequest = question.toLowerCase().includes('/image') || 
+                                      question.toLowerCase().includes('generate image') ||
+                                      question.toLowerCase().includes('show me image');
+                
+                // Simulate AI thinking and response
+                setTimeout(() => {
+                    // Hide typing indicator
+                    typingIndicator.style.display = 'none';
+                    
+                    if (isImageRequest) {
+                        // Generate image response
+                        const aiResponse = "Sure! I've generated these images based on your request:";
+                        const images = sampleImages.sort(() => 0.5 - Math.random()).slice(0, 2);
+                        addMessage(aiResponse, 'ai', images);
+                    } else {
+                        // Generate text response
+                        const randomResponse = textResponses[Math.floor(Math.random() * textResponses.length)];
+                        const aiResponse = `${randomResponse} In simple terms, ${question.toLowerCase().replace('?', '')} involves multiple factors that need to be considered for a complete understanding.`;
+                        addMessage(aiResponse, 'ai');
+                    }
+                }, 1500);
+            }
+            
+            // Add message to chat
+            function addMessage(text, type, images = null) {
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('message');
+                messageDiv.classList.add(type + '-message');
+                
+                // Create message header
+                const messageHeader = document.createElement('div');
+                messageHeader.classList.add('message-header');
+                
+                if (type === 'user') {
+                    messageHeader.innerHTML = '<i class="fas fa-user"></i> <span>You</span>';
+                } else {
+                    messageHeader.innerHTML = '<i class="fas fa-robot"></i> <span>AI Assistant</span>';
+                }
+                
+                messageDiv.appendChild(messageHeader);
+                
+                // Add message text
+                const messageText = document.createElement('div');
+                messageText.textContent = text;
+                messageDiv.appendChild(messageText);
+                
+                // Add images if provided
+                if (images && type === 'ai') {
+                    const imageResponse = document.createElement('div');
+                    imageResponse.classList.add('image-response');
+                    
+                    images.forEach(imgUrl => {
+                        const imagePlaceholder = document.createElement('div');
+                        imagePlaceholder.classList.add('image-placeholder');
+                        
+                        const img = document.createElement('img');
+                        img.src = imgUrl;
+                        img.alt = "Generated image";
+                        
+                        imagePlaceholder.appendChild(img);
+                        imageResponse.appendChild(imagePlaceholder);
+                    });
+                    
+                    messageDiv.appendChild(imageResponse);
+                }
+                
+                chatContainer.appendChild(messageDiv);
+                
+                // Scroll to bottom
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+            
+            // Event listeners
+            sendBtn.addEventListener('click', sendMessage);
+            
+            questionInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+            
+            // Add some example questions for user convenience
+            const suggestions = document.createElement('div');
+            suggestions.classList.add('suggestion-chips');
+            suggestions.innerHTML = `
+                <div class="suggestion-chip">Tell me about AI</div>
+                <div class="suggestion-chip">How to create a website?</div>
+                <div class="suggestion-chip">/image of a futuristic city</div>
+                <div class="suggestion-chip">Write a poem about nature</div>
+            `;
+            chatContainer.appendChild(suggestions);
+            
+            // Add event listeners to suggestion chips
+            document.querySelectorAll('.suggestion-chip').forEach(chip => {
+                chip.addEventListener('click', function() {
+                    questionInput.value = this.textContent;
+                    questionInput.focus();
+                });
+            });
+        });
+    </script>
+</body>
+</html>
